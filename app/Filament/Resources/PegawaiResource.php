@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PegawaiResource\Pages;
 use App\Filament\Resources\PegawaiResource\RelationManagers;
+use App\Filament\Resources\PegawaiResource\Widgets\PegawaiStatsOverview;
 use App\Models\Pegawai;
 use Filament\Forms;
 use Filament\Forms\Components\Card;
@@ -38,12 +39,15 @@ class PegawaiResource extends Resource
                     ->columns(2)
                     ->schema([
                         Forms\Components\TextInput::make('nik')
-                            ->numeric()
+                            ->unique()
+                            ->regex('/^[0-9]*$/')
                             ->length(16),
                         Forms\Components\TextInput::make('nama')
                             ->required(),
                         Forms\Components\DateTimePicker::make('tanggal_lahir')
-                            ->required(),
+                            ->required()
+                            ->minDate(now()->subYears(70))
+                            ->maxDate(now()->subYears(15)),
                         Forms\Components\Select::make('gender')
                             ->required()
                             ->options([
@@ -55,10 +59,12 @@ class PegawaiResource extends Resource
                     ->columns(2)
                     ->schema([
                         Forms\Components\TextInput::make('nomor_hp')
-                            ->numeric()
+                            ->unique()
+                            ->regex('/^[0-9]*$/')
                             ->minLength(10)
                             ->maxLength(13),
                         Forms\Components\TextInput::make('email')
+                            ->unique()
                             ->email()
                             ->maxLength(255),
                     ]),
@@ -107,6 +113,13 @@ class PegawaiResource extends Resource
             'index' => Pages\ListPegawais::route('/'),
             'create' => Pages\CreatePegawai::route('/create'),
             'edit' => Pages\EditPegawai::route('/{record}/edit'),
+        ];
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            PegawaiStatsOverview::class
         ];
     }
 }

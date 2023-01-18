@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -27,5 +28,10 @@ class Pegawai extends Model
     public function suratKeluars()
     {
         return $this->hasMany(SuratKeluar::class);
+    }
+
+    public static function getAge()
+    {
+        return Carbon::parse('tanggal_lahir')->age;
     }
 }
