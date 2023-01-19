@@ -31,44 +31,54 @@ class PegawaiResource extends Resource
 
     protected static ?string $pluralModelLabel  = 'Pegawai';
 
+    protected static ?string $navigationGroup = 'Pegawai';
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Card::make()
-                    ->columns(2)
+                Forms\Components\Group::make()
                     ->schema([
-                        Forms\Components\TextInput::make('nik')
-                            ->unique()
-                            ->regex('/^[0-9]*$/')
-                            ->length(16),
-                        Forms\Components\TextInput::make('nama')
-                            ->required(),
-                        Forms\Components\DateTimePicker::make('tanggal_lahir')
-                            ->required()
-                            ->minDate(now()->subYears(70))
-                            ->maxDate(now()->subYears(15)),
-                        Forms\Components\Select::make('gender')
-                            ->required()
-                            ->options([
-                                'Pria' => 'Pria',
-                                'Wanita' => 'Wanita'
+                        Section::make('Data Pribadi')
+                            ->columns(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('nik')
+                                    ->unique(Pegawai::class, 'nik', ignoreRecord: true)
+                                    ->regex('/^[0-9]*$/')
+                                    ->length(16),
+                                Forms\Components\TextInput::make('nama')
+                                    ->required(),
+                                Forms\Components\DateTimePicker::make('tanggal_lahir')
+                                    ->required()
+                                    ->minDate(now()->subYears(70))
+                                    ->maxDate(now()->subYears(15)),
+                                Forms\Components\Select::make('gender')
+                                    ->required()
+                                    ->options([
+                                        'Pria' => 'Pria',
+                                        'Wanita' => 'Wanita'
+                                    ]),
                             ]),
-                    ]),
-                Section::make('Kontak')
-                    ->columns(2)
+                    ])
+                    ->columnSpan(['lg' => 2]),
+                Forms\Components\Group::make()
                     ->schema([
-                        Forms\Components\TextInput::make('nomor_hp')
-                            ->unique()
-                            ->regex('/^[0-9]*$/')
-                            ->minLength(10)
-                            ->maxLength(13),
-                        Forms\Components\TextInput::make('email')
-                            ->unique()
-                            ->email()
-                            ->maxLength(255),
-                    ]),
-            ]);
+                        Section::make('Kontak')
+                            ->schema([
+                                Forms\Components\TextInput::make('nomor_hp')
+                                    ->unique(Pegawai::class, 'nomor_hp', ignoreRecord: true)
+                                    ->regex('/^[0-9]*$/')
+                                    ->minLength(10)
+                                    ->maxLength(13),
+                                Forms\Components\TextInput::make('email')
+                                    ->unique(Pegawai::class, 'email', ignoreRecord: true)
+                                    ->email()
+                                    ->maxLength(255),
+                            ]),
+                    ])
+                    ->columnSpan(['lg' => 1]),
+            ])
+            ->columns(3);
     }
 
     public static function table(Table $table): Table
@@ -80,6 +90,7 @@ class PegawaiResource extends Resource
                 Tables\Columns\TextColumn::make('nama')
                     ->sortable()
                     ->searchable(),
+                Tables\Columns\TextColumn::make('usia'),
                 Tables\Columns\TextColumn::make('tanggal_lahir')
                     ->sortable()
                     ->searchable()

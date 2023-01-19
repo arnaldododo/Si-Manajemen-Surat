@@ -13,10 +13,18 @@ class PegawaiStatsOverview extends BaseWidget
         $totalPegawai = Pegawai::all()->count();
         $jumlahPria = Pegawai::where('gender', 'Pria')->count();
         $jumlahWanita = Pegawai::where('gender', 'Wanita')->count();
+
+        $persenPria = 0;
+        $persenWanita = 0;
+        if ($totalPegawai > 0) {
+            $persenPria = number_format(($jumlahPria / $totalPegawai) * 100, 2);
+            $persenWanita = number_format(($jumlahWanita / $totalPegawai) * 100, 2);
+        }
+
         return [
             Card::make('Total Pegawai', $totalPegawai),
-            Card::make('Pria (%)', $jumlahPria / $totalPegawai * 100),
-            Card::make('Wanita (%)', $jumlahWanita / $totalPegawai * 100)
+            Card::make('Pria (%)', $persenPria),
+            Card::make('Wanita (%)', $persenWanita),
         ];
     }
 }

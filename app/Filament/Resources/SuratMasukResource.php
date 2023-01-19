@@ -52,12 +52,54 @@ class SuratMasukResource extends Resource
                             ->required()
                             ->maxLength(255),
                         Select::make('pegawai_id')
-                            ->relationship('pegawai', 'nama'),
+                            ->label('Pegawai bersangkutan (PIC)')
+                            ->relationship('pegawai', 'nama')
+                            ->createOptionForm([
+                                Forms\Components\Group::make()
+                                    ->schema([
+                                        Section::make('Data Pribadi')
+                                            ->columns(2)
+                                            ->schema([
+                                                Forms\Components\TextInput::make('nik')
+                                                    ->unique(Pegawai::class, 'nik', ignoreRecord: true)
+                                                    ->regex('/^[0-9]*$/')
+                                                    ->length(16),
+                                                Forms\Components\TextInput::make('nama')
+                                                    ->required(),
+                                                Forms\Components\DateTimePicker::make('tanggal_lahir')
+                                                    ->required()
+                                                    ->minDate(now()->subYears(70))
+                                                    ->maxDate(now()->subYears(15)),
+                                                Forms\Components\Select::make('gender')
+                                                    ->required()
+                                                    ->options([
+                                                        'Pria' => 'Pria',
+                                                        'Wanita' => 'Wanita'
+                                                    ]),
+                                            ]),
+                                    ]),
+                                Forms\Components\Group::make()
+                                    ->schema([
+                                        Section::make('Kontak')
+                                            ->schema([
+                                                Forms\Components\TextInput::make('nomor_hp')
+                                                    ->unique(Pegawai::class, 'nomor_hp', ignoreRecord: true)
+                                                    ->regex('/^[0-9]*$/')
+                                                    ->minLength(10)
+                                                    ->maxLength(13),
+                                                Forms\Components\TextInput::make('email')
+                                                    ->unique(Pegawai::class, 'email', ignoreRecord: true)
+                                                    ->email()
+                                                    ->maxLength(255),
+                                            ]),
+                                    ]),
+                            ]),
                     ]),
                 Section::make('Isi surat / Ringkasan')
                     ->schema([
                         RichEditor::make('isi')
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->disableLabel(),
                     ]),
                 Section::make('File surat')
                     ->schema([
@@ -65,7 +107,8 @@ class SuratMasukResource extends Resource
                             ->disk('public')
                             ->directory('surat-masuk')
                             ->maxSize(5120)
-                            ->acceptedFileTypes(['application/pdf']),
+                            ->acceptedFileTypes(['application/pdf'])
+                            ->disableLabel(),
                     ]),
             ]);
     }
@@ -74,12 +117,18 @@ class SuratMasukResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('pegawai.nama'),
-                Tables\Columns\TextColumn::make('nomor'),
+                Tables\Columns\TextColumn::make('pegawai.nama')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('nomor')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('tanggal')
+                    ->sortable()
+                    ->searchable()
                     ->dateTime(),
-                Tables\Columns\TextColumn::make('pengirim'),
-                Tables\Columns\TextColumn::make('perihal'),
+                Tables\Columns\TextColumn::make('pengirim')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('perihal')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('file'),
             ])
             ->filters([

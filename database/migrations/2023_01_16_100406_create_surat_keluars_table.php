@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('surat_keluars', function (Blueprint $table) {
             $table->id();
+            $table->string('nomor')->unique();
             $table->dateTime('tanggal');
             $table->string('kepada');
             $table->string('perihal');

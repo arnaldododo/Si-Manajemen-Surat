@@ -23,5 +23,9 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
             'email_verified_at' => now()
         ]);
+
+        \App\Models\Pegawai::factory(50)->create();
+        \App\Models\SuratMasuk::factory(50)->create();
+        \App\Models\SuratKeluar::factory(50)->create();
     }
 }

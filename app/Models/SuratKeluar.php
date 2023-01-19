@@ -11,6 +11,7 @@ class SuratKeluar extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'nomor',
         'tanggal',
         'kepada',
         'perihal',

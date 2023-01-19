@@ -20,6 +20,10 @@ class Pegawai extends Model
         'email'
     ];
 
+    protected $appends = [
+        'usia'
+    ];
+
     public function suratMasuks()
     {
         return $this->hasMany(SuratMasuk::class);
@@ -30,8 +34,8 @@ class Pegawai extends Model
         return $this->hasMany(SuratKeluar::class);
     }
 
-    public static function getAge()
+    public function getUsiaAttribute()
     {
-        return Carbon::parse('tanggal_lahir')->age;
+        return Carbon::parse($this->tanggal_lahir)->age;
     }
 }

@@ -39,6 +39,9 @@ class SuratKeluarResource extends Resource
                 Card::make()
                     ->columns(2)
                     ->schema([
+                        TextInput::make('nomor')
+                            ->suffix("Nomor surat sebelumnya : " . SuratKeluar::latest()->first()->nomor)
+                            ->columnSpanFull(),
                         DateTimePicker::make('tanggal')
                             ->required(),
                         TextInput::make('kepada')
@@ -48,39 +51,54 @@ class SuratKeluarResource extends Resource
                             ->required()
                             ->maxLength(255),
                         Select::make('pegawai_id')
+                            ->label('Pegawai bersangkutan (PIC)')
                             ->relationship('pegawai', 'nama')
                             ->createOptionForm([
-                                Section::make('Data')
-                                    ->columns(2)
+                                Forms\Components\Group::make()
                                     ->schema([
-                                        Forms\Components\TextInput::make('nik')
-                                            ->maxLength(255),
-                                        Forms\Components\TextInput::make('nama')
-                                            ->required(),
-                                        Forms\Components\DateTimePicker::make('tanggal_lahir')
-                                            ->required(),
-                                        Forms\Components\Select::make('gender')
-                                            ->required()
-                                            ->options([
-                                                'Pria' => 'Pria',
-                                                'Wanita' => 'Wanita'
+                                        Section::make('Data Pribadi')
+                                            ->columns(2)
+                                            ->schema([
+                                                Forms\Components\TextInput::make('nik')
+                                                    ->unique(Pegawai::class, 'nik', ignoreRecord: true)
+                                                    ->regex('/^[0-9]*$/')
+                                                    ->length(16),
+                                                Forms\Components\TextInput::make('nama')
+                                                    ->required(),
+                                                Forms\Components\DateTimePicker::make('tanggal_lahir')
+                                                    ->required()
+                                                    ->minDate(now()->subYears(70))
+                                                    ->maxDate(now()->subYears(15)),
+                                                Forms\Components\Select::make('gender')
+                                                    ->required()
+                                                    ->options([
+                                                        'Pria' => 'Pria',
+                                                        'Wanita' => 'Wanita'
+                                                    ]),
                                             ]),
                                     ]),
-                                Section::make('Kontak')
-                                    ->columns(2)
+                                Forms\Components\Group::make()
                                     ->schema([
-                                        Forms\Components\TextInput::make('nomor_hp')
-                                            ->maxLength(255),
-                                        Forms\Components\TextInput::make('email')
-                                            ->email()
-                                            ->maxLength(255),
+                                        Section::make('Kontak')
+                                            ->schema([
+                                                Forms\Components\TextInput::make('nomor_hp')
+                                                    ->unique(Pegawai::class, 'nomor_hp', ignoreRecord: true)
+                                                    ->regex('/^[0-9]*$/')
+                                                    ->minLength(10)
+                                                    ->maxLength(13),
+                                                Forms\Components\TextInput::make('email')
+                                                    ->unique(Pegawai::class, 'email', ignoreRecord: true)
+                                                    ->email()
+                                                    ->maxLength(255),
+                                            ]),
                                     ]),
                             ]),
                     ]),
                 Section::make('Isi surat / Ringkasan')
                     ->schema([
                         RichEditor::make('isi')
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->disableLabel(),
                     ]),
                 Section::make('File surat')
                     ->schema([
@@ -88,7 +106,8 @@ class SuratKeluarResource extends Resource
                             ->disk('public')
                             ->directory('surat-keluar')
                             ->maxSize(5120)
-                            ->acceptedFileTypes(['application/pdf']),
+                            ->acceptedFileTypes(['application/pdf'])
+                            ->disableLabel(),
                     ]),
             ]);
     }
@@ -97,11 +116,18 @@ class SuratKeluarResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('pegawai_id'),
+                Tables\Columns\TextColumn::make('nomor')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('pegawai_id')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('tanggal')
+                    ->sortable()
+                    ->searchable()
                     ->dateTime(),
-                Tables\Columns\TextColumn::make('kepada'),
-                Tables\Columns\TextColumn::make('perihal'),
+                Tables\Columns\TextColumn::make('kepada')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('perihal')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('file'),
             ])
             ->filters([
